@@ -194,10 +194,12 @@ function draw() {
         buttons_layer[i].render();
     }
 
-    //render hovered geometry
-    hover_p = new Point(mouseX, mouseY);
-    // read from top layers to bottom
 
+//************ hover geometry************//
+    // render hovered geometry
+    hover_p = new Point(mouseX, mouseY);
+    
+    // read from top layers to bottom
     for (let i = 0; i < shapes.length; i++) {
         // only active layer geometry could be hovered
         if (i == active_layer) {
@@ -248,7 +250,8 @@ function draw() {
     //     voids_curve[i].render();
     // }
 
-    // move geometry
+
+//************ move geometry ************//
     if (selected) {
         // for ipad use, check move distance
         if (abs(mouseX - temp_p.X) < abs(mouseX - pmouseX)) x_dist = mouseX - temp_p.X;
@@ -286,6 +289,7 @@ function draw() {
         // }
     }
 
+//************ draw lines ************//
     // draw temp sketching LINES
     for (let i = 0; i < sketchingLines.length; i++) {
         sketchingLines[i].render(1);
@@ -299,14 +303,14 @@ function draw() {
 
 }
 
+
+//************ push geometry to array ************//
 // Record shapes and attributes
 function mouseReleased() {
     // record line in to rectangle
     if (!btned && !selected && !curvemode && !delete_mode && !new_layer) {
         count += 1;
         rec.push([lastLine.start.X, lastLine.start.Y, lastLine.end.X, lastLine.end.Y]);
-        print(rec);
-        print(count);
 
         // If a rectangle is formed, append it to shapes
         if (count % 4 == 0 && count != 0){
@@ -318,7 +322,6 @@ function mouseReleased() {
             rec = [];
             sketchingLines = [];
             // print(finalExport(shapes));
-            print(shapes);
             socket.send(finalExport(shapes));
         }
     }
@@ -500,6 +503,7 @@ function mousePressed() {
             buttons_layer[i].select = true;
             buttons_layer[i].execute();
             btned = true;
+            socket.send(finalExport(shapes));
         }
     }
 
