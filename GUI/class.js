@@ -304,26 +304,39 @@ class ButtonHeight extends Button {
     }
 
     render() {
-        push();
-        fill(this.color);
-        noStroke();
-        circle(this.centerx, this.centery, this.radius);
+        if (this.status == 'active'){
+            push();
+            fill(this.color);
+            noStroke();
+            circle(this.centerx, this.centery, this.radius);
+    
+            textFont('Helvetica', 8);
+            textAlign(CENTER);
+            fill('#aaaaaa');
+            text(this.word, this.centerx, this.centery + 24);
+            pop();
 
-        textFont('Helvetica', 8);
-        textAlign(CENTER);
-        fill('#aaaaaa');
-        text(this.word, this.centerx, this.centery + 24);
-        pop();
-
-            if (this.status == 'active'){
-                push();
-                stroke('white');
-                strokeWeight(3);
-                noFill();
-                circle(this.centerx, this.centery, this.radius - 10);
-                pop();
-            }
+            push();
+            stroke('white');
+            strokeWeight(3);
+            noFill();
+            circle(this.centerx, this.centery, this.radius - 10);
+            pop();
         }
+        
+        else if(this.status == 'inactive'){
+            push();
+            fill(this.color);
+            noStroke();
+            circle(this.centerx, this.centery, this.radius);
+
+            textFont('Helvetica', 8);
+            textAlign(CENTER);
+            fill('#aaaaaa');
+            text(this.word, this.centerx, this.centery + 24);
+            pop();
+        }
+    }
 }
 
 
@@ -617,7 +630,7 @@ class ButtonLayer extends Button {
             fill('#d11919'); ``
             noStroke();
             circle(this.centerx, this.centery, this.radius);
-            
+
             push();
             stroke('white');
             strokeWeight('3');
