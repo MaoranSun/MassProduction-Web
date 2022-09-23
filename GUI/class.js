@@ -516,6 +516,7 @@ class ButtonDelete extends Button {
 }
 
 
+// current layer
 class ButtonDrawingLayer extends Button {
     constructor(locationx, locationy, color, word) {
         super(locationx, locationy, color, word);
