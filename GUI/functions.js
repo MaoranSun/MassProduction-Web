@@ -148,11 +148,18 @@ function polyExport(polygon) {
 // Final Export
 function finalExport(shapes) {
     let final = [];
-
+    let delete_count = 0;
     for (let i = 0; i < shapes.length; i++) {
         for (let j = 0; j < shapes[i].length; j++) {
-            if (!shapes[i][j].delete && !shapes[i][j].handdelete) final.push(recExport(shapes[i][j]));
+            if (!shapes[i][j].delete && !shapes[i][j].handdelete) 
+                final.push(recExport(shapes[i][j]));
+            else if (shapes[i][j].delete || shapes[i][j].handdelete) 
+                delete_count ++;
+                console.log(delete_count, shapes[0].length);
         }
+    if(delete_count == shapes[0].length)
+        final.push(' ');
+        console.log(final);
     }
 
     for (let i = 0; i < voids.length; i++) {
