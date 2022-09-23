@@ -90,7 +90,8 @@ function setup() {
 
   // Retail Program Button
   retail_btn = new ButtonColor(350, btn_y, '#E84A5F', 'Commercial');
-       
+  retail_btn.status = 'active';
+
   // Residential Program Button
   residential_btn = new ButtonColor(400, btn_y, '#FECEAB', 'Residential');
 
@@ -102,6 +103,7 @@ function setup() {
 
   // 1-3 storey Button
   flr13_btn = new ButtonHeight(600, btn_y, '#aaaaaa', '1-3F', '1-3');
+  flr13_btn.status = 'active';
 
   // 4-6 storey Button
   flr46_btn = new ButtonHeight(650, btn_y, '#aaaaaa', '4-6F', '4-6');
