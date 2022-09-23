@@ -377,7 +377,6 @@ function mouseReleased() {
         for (let j = 0; j < voids[i].length; j++) {
             voids[i][j].select = false;
         }
-
     }
 
     // for (let i = 0; i < voids_curve.length; i++) {
@@ -394,7 +393,7 @@ function mouseReleased() {
 
 
     print("Active layer: ", active_layer);
-    print(selected);
+    //print(selected);
 }
 
 function mouseDragged() {
