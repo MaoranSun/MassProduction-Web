@@ -30,7 +30,6 @@
             let group = new THREE.Group();
             let ptArray = [];  
             let allPtArray = [];
-            let allBasePoints = [];
             let cubeArray = [];
             let voidCubeArray = [];
 
@@ -57,8 +56,6 @@
                             basePoints.push(pt);
                         }
 
-                        allBasePoints.push(basePoints);
-                        //console.log("all Basepoints: ", allBasePoints);
                         return basePoints;
                     }
 
@@ -110,9 +107,6 @@
                             return true;
                         }
                     }
-
-
-
 
 
                     // draw the void path
@@ -241,17 +235,15 @@
                     clearCanvas();
 
                     //if pressed clear canvas button
-                    if(event.data === "Clear Canvas"){
+                    if(event.data === "Clear Canvas" || event.data == " "){
                         clearCanvas();
                     }
-                    //console.log(group);
 
                     //array to store the plan info
                     ptArray = event.data.split(',');;
                     console.log(ptArray);
 
                     // array to store every single plan info
-                    allBasePoints = [];
                     cubeArray = [];
                     voidCubeArray = [];
 
@@ -311,19 +303,11 @@
 
 
             // setup the camera
-            const camera = new THREE.PerspectiveCamera(80, windowRatio, 1, 2000);
-            camera.position.set(-800, 0, 2000);
-            //camera.lookAt(windowWidth / 2, 0, 400);
 
-            const cameraHelper = new THREE.CameraHelper( camera );
-            scene.add( cameraHelper );
-
-            let cameraPerspective = new THREE.PerspectiveCamera( 60, windowRatio, 150, 1500 );
-            cameraPerspective.position.set(800, 500, 300);
-            cameraPerspective.lookAt(new THREE.Vector3(200, 0, -200));
-            let cameraPerspectiveHelper = new THREE.CameraHelper( cameraPerspective );
-
-            scene.add( cameraPerspectiveHelper );
+            let cameraPerspective = new THREE.PerspectiveCamera( 60, windowRatio, 100, 1500 );
+            cameraPerspective.position.set(8000, 800, -300);
+            
+            //let cameraPerspectiveHelper = new THREE.CameraHelper( cameraPerspective );
             
 
             // setup the lighting
@@ -331,31 +315,31 @@
             dirLight1.position.set( 1, 1, 1 );
             scene.add( dirLight1 );
 
-            const dirLight2 = new THREE.DirectionalLight( 0x002288 );
+            const dirLight2 = new THREE.DirectionalLight( '#7a7a79' );
             dirLight2.position.set( - 1, - 1, - 1 );
             scene.add( dirLight2 );
 
 
             //// light for shadow
             const shadowDirLight = new THREE.DirectionalLight( 0xcccccc, 0.5 );
-            shadowDirLight.position.set( 800, 500, 50);
+            shadowDirLight.position.set( 800, 600, -550);
             shadowDirLight.target.position.set( 0, 0, 300);
 
             shadowDirLight.castShadow = true;
             scene.add( shadowDirLight );
 
             shadowDirLight.shadow.camera.near = 10;
-            shadowDirLight.shadow.camera.far = 1000;
-            shadowDirLight.shadow.camera.left = -200;
-            shadowDirLight.shadow.camera.right = 1200;
-            shadowDirLight.shadow.camera.top = -300;
-            shadowDirLight.shadow.camera.bottom = 300;
+            shadowDirLight.shadow.camera.far = 1500;
+            shadowDirLight.shadow.camera.left = -500;
+            shadowDirLight.shadow.camera.right = 1800;
+            shadowDirLight.shadow.camera.top = 500;
+            shadowDirLight.shadow.camera.bottom = -900;
             shadowDirLight.shadow.mapSize.height = 1024;
             shadowDirLight.shadow.mapSize.width = 1024;
             shadowDirLight.shadow.radius = 5;
 
-            const helper = new THREE.CameraHelper( shadowDirLight.shadow.camera );
-            scene.add( helper );
+            //const helper = new THREE.CameraHelper( shadowDirLight.shadow.camera );
+            //scene.add( helper );
 
 
             //// ambient light
@@ -365,7 +349,7 @@
 
             // create a ground
             const groundGeometry = new THREE.PlaneGeometry(4000, 20000, 4, 4);
-            const groundMaterial = new THREE.MeshLambertMaterial({color: 0x777777, side: THREE.DoubleSide});
+            const groundMaterial = new THREE.MeshLambertMaterial({color: '#aaaaaa', side: THREE.DoubleSide});
             const ground = new THREE.Mesh(groundGeometry, groundMaterial);
             ground.rotation.set(-0.5 * Math.PI, 0 , 0);
             scene.add(ground);
@@ -391,9 +375,13 @@
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
 
+            controls.enableZoom = true;
+
             controls.minDistance = 100;
             controls.maxDistance = 500;
             controls.maxPolarAngle = Math.PI / 2;
+
+            controls.target = new THREE.Vector3(200, 0, -500);
             controls.target.set(200, 0, -500);
 
 
