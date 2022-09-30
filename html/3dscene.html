@@ -60,7 +60,12 @@
 
                     // generate plan from the base points
                     getBaseShape(){
-                        let baseShape = new THREE.Shape();
+                        let baseShape = new THREE.Shape(this.basePoints);
+                        return baseShape;
+                        
+                        
+                    /*
+                    let baseShape = new THREE.Shape();
 
                         baseShape.moveTo(this.ptArray[0], this.ptArray[1]);
                         // baseShape.moveTo(this.basePoints[0].x, this.basePoints[0].y);
@@ -70,6 +75,7 @@
                         baseShape.lineTo(this.ptArray[0], this.ptArray[1]);
 
                         return baseShape;
+                        */
                     }
 
 
@@ -89,11 +95,12 @@
                         
                         let material = new THREE.MeshLambertMaterial({color : this.materialColor, flatShading: true});
                         material.side = THREE.DoubleSide;
+
                         //add edges
                         // this.drawEdges(meshGeometry);
                         
                         let mesh = new THREE.Mesh(meshGeometry, material);
-                        // mesh.rotation.set(-0.5 * Math.PI, 0 , 0);
+                        mesh.rotation.set(-0.5 * Math.PI, 0, 0);
                         mesh.castShadow = true;
                         mesh.receiveShadow = false;
 
@@ -217,6 +224,10 @@
                         }
                         else if(this.ptArray[8] == "office"){
                             return '#99B898';
+                        }
+                        else
+                        {
+                            return '#333333';
                         }
                     }                
 
