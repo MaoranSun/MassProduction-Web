@@ -320,6 +320,8 @@
                         if (meshCube.mesh == null) {
                             let geo = meshCube.getMesh();
                             geo.rotation.set(-0.5 * Math.PI, 0 , 0);
+
+                            console.log(geo);
                             group.add(geo);
                         }
                         else {

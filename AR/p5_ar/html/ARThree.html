@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<head>
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<title>Three and AR</title>
+	<!-- include three.js library -->
+	<script src='../assets/js/three.js'></script>
+	<!-- include jsartookit -->
+	<script src="../assets/jsartoolkit5/artoolkit.min.js"></script>
+	<script src="../assets/jsartoolkit5/artoolkit.api.js"></script>
+	<!-- include threex.artoolkit -->
+	<script src="../assets/threex/threex-artoolkitsource.js"></script>
+	<script src="../assets/threex/threex-artoolkitcontext.js"></script>
+	<script src="../assets/threex/threex-arbasecontrols.js"></script>
+	<script src="../assets/threex/threex-armarkercontrols.js"></script>
+</head>
+
+<body style='margin : 0px; overflow: hidden; font-family: Monospace;'>
+
+<!-- 
+  Example created by Lee Stemkoski: https://github.com/stemkoski
+  Based on the AR.js library and examples created by Jerome Etienne: https://github.com/jeromeetienne/AR.js/
+-->
+
+<script>
+
+class MeshCube{
+	constructor(ptArray){
+		this.ptArray = ptArray;
+		this.basePts = this.getBasePts();
+		this.baseShape = this.getBaseShape();
+		this.height = this.getHeight();
+		this.materialColor = this.getMaterialColor();
+		this.void = this.checkVoid();
+	}
+
+	getBasePts(){
+		let basePts = [];
+		for(var i = 0; i < 8; i += 2){
+			var pt = new THREE.Vector2(this.ptArray[i + 1]/200, this.ptArray[i]/200);
+			basePts.push(pt);
+		}
+		return basePts;
+	}
+
+	getBaseShape(){
+		return new THREE.Shape(this.basePts);
+	}
+
+	getHeight(){
+		if(this.ptArray[9] == "1-3"){
+			return 30;
+		}
+		else if(this.ptArray[9] == "4-6"){
+			return 60;
+		}
+		else if(this.ptArray[9] == "9-12"){
+			return 120;
+		}
+	}
+
+	getMaterialColor(){
+		if(this.ptArray[8] == "retail"){
+			return '#E84A5F' ;
+		}
+		else if(this.ptArray[8] == "residential"){
+			return '#FECEAB';
+		}
+		else if(this.ptArray[8] == "office"){
+			return '#99B898';
+		}
+	}
+
+	checkVoid(){
+		if(this.ptArray[8] == "void"){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+
+	render(){
+		let meshGeometry = new THREE.ExtrudeGeometry(this.baseShape, {amount: this.height / 200, bevelEnabled: false});
+		let material = new THREE.MeshLambertMaterial({color : this.materialColor, flatShading: true});
+
+		let mesh = new THREE.Mesh(meshGeometry, material);
+		console.log(mesh);
+		mesh.rotation.set(-0.5 * Math.PI, 0 , 0);
+		mesh.castShadow = true;
+		mesh.receiveShadow = false;
+		mesh.position.z = 1;
+		mesh.position.x = -1.5;
+		
+		return mesh;
+	}
+
+	checkIntersect(anotherCube){
+		for(let i = 0; i < anotherCube.basePts.length; i++){
+			if(!isInside(anotherCube.basePts[i], this.basePts)) {
+				return false;
+			}
+		}
+		return true;
+	}
+}
+
+var scene, camera, renderer, clock, deltaTime, totalTime;
+
+var arToolkitSource, arToolkitContext;
+
+//setup websocket
+var ws = new WebSocket("ws://localhost:3000");
+
+ws.addEventListener('open', function(event){
+	ws.send('"Hello From 3D!"');
+});
+
+ws.onmessage = (event) => {
+	console.log(event.data);
+	if((typeof(event.data) === 'string') && (event.data != '')&& (event.data != '"Hello From 3D!"') && (event.data != "'Hello From Sketch!'")){
+		clearCanvas();
+
+
+		//if pressed clear canvas button
+		if(event.data === "Clear Canvas" || event.data == " "){
+			clearCanvas();
+		}
+
+		//array to store the plan info
+		ptArray = event.data.split(',');;
+		// console.log(ptArray);
+
+		let cubeArray = [];
+
+		for(let i=0; i < ptArray.length / 12; i++){
+			let singlePtArray = ptArray.slice(i * 12, (i + 1)*12);
+			// let bufferCube = new MeshCube(singlePtArray);
+			cubeArray.push(new MeshCube(singlePtArray));
+		}
+
+		cubeArray.forEach(cube => {
+			markerRoot1.add(cube.render());
+		});
+	}
+
+	else if(event.data instanceof ArrayBuffer){
+		var buffer = event.data;
+		console.log("Received array");
+	}
+}
+
+initialize();
+animate();
+
+function initialize()
+{
+	scene = new THREE.Scene();
+
+	let ambientLight = new THREE.AmbientLight( 0xcccccc, 0.5 );
+	scene.add( ambientLight );
+				
+	camera = new THREE.Camera();
+	scene.add(camera);
+
+	renderer = new THREE.WebGLRenderer({
+		antialias : true,
+		alpha: true
+	});
+	renderer.setClearColor(new THREE.Color('lightgrey'), 0)
+	renderer.setSize( 640, 480 );
+	renderer.domElement.style.position = 'absolute'
+	renderer.domElement.style.top = '0px'
+	renderer.domElement.style.left = '0px'
+	document.body.appendChild( renderer.domElement );
+
+	clock = new THREE.Clock();
+	deltaTime = 0;
+	totalTime = 0;
+	
+	////////////////////////////////////////////////////////////
+	// setup arToolkitSource
+	////////////////////////////////////////////////////////////
+
+	arToolkitSource = new THREEx.ArToolkitSource({
+		sourceType : 'webcam',
+	});
+
+	function onResize()
+	{
+		arToolkitSource.onResize()	
+		arToolkitSource.copySizeTo(renderer.domElement)	
+		if ( arToolkitContext.arController !== null )
+		{
+			arToolkitSource.copySizeTo(arToolkitContext.arController.canvas)	
+		}	
+	}
+
+	arToolkitSource.init(function onReady(){
+		onResize()
+	});
+	
+	// handle resize event
+	window.addEventListener('resize', function(){
+		onResize()
+	});
+	
+	////////////////////////////////////////////////////////////
+	// setup arToolkitContext
+	////////////////////////////////////////////////////////////	
+
+	// create atToolkitContext
+	arToolkitContext = new THREEx.ArToolkitContext({
+		cameraParametersUrl: 'https://ratpvisualtest.s3.amazonaws.com/camera_para.dat',
+		detectionMode: 'mono'
+	});
+	
+	// copy projection matrix to camera when initialization complete
+	arToolkitContext.init( function onCompleted(){
+		camera.projectionMatrix.copy( arToolkitContext.getProjectionMatrix() );
+	});
+
+	////////////////////////////////////////////////////////////
+	// setup markerRoots
+	////////////////////////////////////////////////////////////
+
+	// build markerControls
+	markerRoot1 = new THREE.Group();
+	scene.add(markerRoot1);
+	let markerControls1 = new THREEx.ArMarkerControls(arToolkitContext, markerRoot1, {
+		type: 'pattern', patternUrl: "https://ratpvisualtest.s3.amazonaws.com/hiro.patt",
+	})
+}
+
+
+function update()
+{
+	// update artoolkit on every frame
+	if ( arToolkitSource.ready !== false )
+		arToolkitContext.update( arToolkitSource.domElement );
+}
+
+function clearCanvas(){
+	console.log("cleared!");
+	let groupChildren = markerRoot1.children;
+	for(var i = groupChildren.length - 1; i >= 0; i --){
+		console.log(groupChildren[i]);
+		if((groupChildren[i] instanceof THREE.Mesh) || (groupChildren[i] instanceof THREE.LineSegments)){
+			markerRoot1.remove(groupChildren[i]);
+		}
+	}
+}
+
+
+function render()
+{
+	renderer.render(scene,camera );
+}
+
+
+function animate()
+{
+	requestAnimationFrame(animate);
+	deltaTime = clock.getDelta();
+	totalTime += deltaTime;
+	update();
+	render();
+}
+
+</script>
+
+<script>
+
+</script>
+
+</body>
+</html>
